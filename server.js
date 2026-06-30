@@ -1,31 +1,146 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST']
-  }
+    origin: process.env.CORS_ORIGIN || "*",
+    methods: ["GET", "POST"],
+  },
 });
 
 const PORT = process.env.PORT || 3000;
 const rooms = new Map();
 
 const WORD_BANKS = {
-  everyday: ['사과', '커피', '우산', '치킨', '지하철', '학교', '편의점', '핸드폰', '라면', '에어컨'],
-  animal: ['고양이', '강아지', '펭귄', '돌고래', '코끼리', '토끼', '사자', '기린', '햄스터', '판다'],
-  place: ['도서관', '영화관', '놀이공원', '한강', '공항', '찜질방', '카페', '노래방', '수영장', '미술관'],
-  food: ['떡볶이', '김밥', '초밥', '파스타', '피자', '샌드위치', '빙수', '마라탕', '된장찌개', '케이크']
+  everyday: [
+    "사과",
+    "커피",
+    "우산",
+    "치킨",
+    "지하철",
+    "학교",
+    "편의점",
+    "핸드폰",
+    "라면",
+    "에어컨",
+  ],
+  animal: [
+    "고양이",
+    "강아지",
+    "펭귄",
+    "돌고래",
+    "코끼리",
+    "토끼",
+    "사자",
+    "기린",
+    "햄스터",
+    "판다",
+    "오리너구리",
+    "해파리",
+    "플라밍고",
+    "상어",
+    "카멜레온",
+    "치타",
+  ],
+  place: [
+    "도서관",
+    "영화관",
+    "놀이공원",
+    "한강",
+    "공항",
+    "찜질방",
+    "카페",
+    "노래방",
+    "수영장",
+    "미술관",
+    "보드게임 카페",
+    "학교",
+    "하이디라오",
+    "기차역",
+    "병원",
+    "은행",
+    "PC방",
+    "동물원",
+    "지하철역",
+    "방탈출카페",
+  ],
+  food: [
+    "된장찌개",
+    "떡볶이",
+    "비빔밥",
+    "라면",
+    "샌드위치",
+    "초밥",
+    "햄버거",
+    "훠궈",
+  ],
+  job: [
+    "교사",
+    "경찰관",
+    "사육사",
+    "상담사",
+    "군의관",
+    "개발자",
+    "해커",
+    "스트리머",
+    "아나운서",
+    "영화감독",
+    "셰프",
+    "요가 강사",
+    "통역사",
+  ],
+  movie: [
+    "기생충",
+    "명량",
+    "극한직업",
+    "올드보이",
+    "엽기적인 그녀",
+    "타짜",
+    "아가씨",
+    "곡성",
+    "아저씨",
+    "라라랜드",
+    "타이타닉",
+    "아바타",
+    "겨울왕국",
+    "인사이드 아웃",
+    "토이 스토리",
+    "알라딘",
+    "어벤져스",
+    "맘마미아",
+    "레미제라블",
+    "파묘",
+  ],
+  situation: [
+    "휴대폰 배터리가 1%일 때",
+    "단톡방 헷갈려서 말실수 했을 때",
+    "지하철을 반대로 탔을 때",
+    "이어폰 한쪽을 잃어버렸는데 주머니에 있을 때",
+    "비밀번호가 기억 안 날 때",
+    "발표자로 갑자기 내가 지목됐을 때",
+    "라이어게임에서 내가 라이어일 때",
+    "라이어게임에서 내가 라이어로 몰렸을 때",
+    "첫 출근하는 날",
+    "엘리베이터 문 닫히는 순간 아는 사람을 봤을 때",
+    "유리문인 줄 모르고 얼굴 박을 뻔했을 때",
+    "아는 척했는데 모르는 사람일 때",
+    "인사했는데 못 본 척당했을 때",
+    "웃으면 안 되는 상황에서 웃음 터질 때",
+    "선생님이 '이거 아는 사람?'했는데 눈 마주쳤을 때",
+    "자기 직전에 바퀴벌레를 보았을 때",
+    "고백각인 줄 알았는데 부탁이었을 때",
+  ],
 };
 
 function makeRoomCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 5; i++)
+    code += chars[Math.floor(Math.random() * chars.length)];
   return code;
 }
 
@@ -35,34 +150,45 @@ function getPublicRoom(room) {
     hostId: room.hostId,
     status: room.status,
     category: room.category,
-    players: room.players.map(p => ({
+    players: room.players.map((p) => ({
       id: p.id,
       nickname: p.nickname,
       isHost: p.id === room.hostId,
-      connected: p.connected
+      connected: p.connected,
     })),
     votes: room.votes,
-    result: room.result
+    result: room.result,
   };
 }
 
 function emitRoom(roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return;
-  io.to(roomCode).emit('room:update', getPublicRoom(room));
+  io.to(roomCode).emit("room:update", getPublicRoom(room));
 }
 
 function getMyInfo(room, socketId) {
-  const player = room.players.find(p => p.id === socketId);
+  const player = room.players.find((p) => p.id === socketId);
   if (!player) return null;
 
   return {
     id: player.id,
     nickname: player.nickname,
     isHost: player.id === room.hostId,
-    role: room.status === 'playing' || room.status === 'ended' ? player.role : null,
-    word: room.status === 'playing' || room.status === 'ended' ? (player.role === 'liar' ? null : room.word) : null,
-    liarHint: room.status === 'playing' || room.status === 'ended' ? (player.role === 'liar' ? '당신은 라이어입니다. 다른 사람들의 설명을 듣고 제시어를 추리하세요.' : null) : null
+    role:
+      room.status === "playing" || room.status === "ended" ? player.role : null,
+    word:
+      room.status === "playing" || room.status === "ended"
+        ? player.role === "liar"
+          ? null
+          : room.word
+        : null,
+    liarHint:
+      room.status === "playing" || room.status === "ended"
+        ? player.role === "liar"
+          ? "당신은 라이어입니다. 다른 사람들의 설명을 듣고 제시어를 추리하세요."
+          : null
+        : null,
   };
 }
 
@@ -70,38 +196,45 @@ function emitPrivateInfo(roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return;
 
-  room.players.forEach(player => {
-    io.to(player.id).emit('me:update', getMyInfo(room, player.id));
+  room.players.forEach((player) => {
+    io.to(player.id).emit("me:update", getMyInfo(room, player.id));
   });
 }
 
-app.get('/healthz', (req, res) => {
-  res.status(200).json({ ok: true, service: 'liar-game-online' });
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ ok: true, service: "liar-game-online" });
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.get('/room/:code', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get("/room/:code", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-io.on('connection', (socket) => {
-  socket.on('room:create', ({ nickname }, callback) => {
-    const cleanName = String(nickname || '').trim().slice(0, 12);
-    if (!cleanName) return callback?.({ ok: false, message: '닉네임을 입력해 주세요.' });
+io.on("connection", (socket) => {
+  socket.on("room:create", ({ nickname }, callback) => {
+    const cleanName = String(nickname || "")
+      .trim()
+      .slice(0, 12);
+    if (!cleanName)
+      return callback?.({ ok: false, message: "닉네임을 입력해 주세요." });
 
     let code;
-    do { code = makeRoomCode(); } while (rooms.has(code));
+    do {
+      code = makeRoomCode();
+    } while (rooms.has(code));
 
     const room = {
       code,
       hostId: socket.id,
-      status: 'waiting',
-      category: 'everyday',
+      status: "waiting",
+      category: "everyday",
       word: null,
-      players: [{ id: socket.id, nickname: cleanName, role: null, connected: true }],
+      players: [
+        { id: socket.id, nickname: cleanName, role: null, connected: true },
+      ],
       votes: {},
-      result: null
+      result: null,
     };
 
     rooms.set(code, room);
@@ -112,18 +245,35 @@ io.on('connection', (socket) => {
     emitPrivateInfo(code);
   });
 
-  socket.on('room:join', ({ code, nickname }, callback) => {
-    const roomCode = String(code || '').trim().toUpperCase();
-    const cleanName = String(nickname || '').trim().slice(0, 12);
+  socket.on("room:join", ({ code, nickname }, callback) => {
+    const roomCode = String(code || "")
+      .trim()
+      .toUpperCase();
+    const cleanName = String(nickname || "")
+      .trim()
+      .slice(0, 12);
     const room = rooms.get(roomCode);
 
-    if (!room) return callback?.({ ok: false, message: '존재하지 않는 방입니다.' });
-    if (!cleanName) return callback?.({ ok: false, message: '닉네임을 입력해 주세요.' });
-    if (room.status !== 'waiting') return callback?.({ ok: false, message: '이미 게임이 시작된 방입니다.' });
-    if (room.players.length >= 10) return callback?.({ ok: false, message: '최대 10명까지만 입장할 수 있습니다.' });
-    if (room.players.some(p => p.nickname === cleanName)) return callback?.({ ok: false, message: '이미 사용 중인 닉네임입니다.' });
+    if (!room)
+      return callback?.({ ok: false, message: "존재하지 않는 방입니다." });
+    if (!cleanName)
+      return callback?.({ ok: false, message: "닉네임을 입력해 주세요." });
+    if (room.status !== "waiting")
+      return callback?.({ ok: false, message: "이미 게임이 시작된 방입니다." });
+    if (room.players.length >= 10)
+      return callback?.({
+        ok: false,
+        message: "최대 10명까지만 입장할 수 있습니다.",
+      });
+    if (room.players.some((p) => p.nickname === cleanName))
+      return callback?.({ ok: false, message: "이미 사용 중인 닉네임입니다." });
 
-    room.players.push({ id: socket.id, nickname: cleanName, role: null, connected: true });
+    room.players.push({
+      id: socket.id,
+      nickname: cleanName,
+      role: null,
+      connected: true,
+    });
     socket.join(roomCode);
     socket.data.roomCode = roomCode;
     callback?.({ ok: true, code: roomCode });
@@ -131,31 +281,34 @@ io.on('connection', (socket) => {
     emitPrivateInfo(roomCode);
   });
 
-  socket.on('game:setCategory', ({ category }) => {
+  socket.on("game:setCategory", ({ category }) => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
-    if (!room || room.hostId !== socket.id || room.status !== 'waiting') return;
+    if (!room || room.hostId !== socket.id || room.status !== "waiting") return;
     if (!WORD_BANKS[category]) return;
     room.category = category;
     emitRoom(roomCode);
   });
 
-  socket.on('game:start', (callback) => {
+  socket.on("game:start", (callback) => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
-    if (!room) return callback?.({ ok: false, message: '방을 찾을 수 없습니다.' });
-    if (room.hostId !== socket.id) return callback?.({ ok: false, message: '방장만 시작할 수 있습니다.' });
-    if (room.players.length < 3) return callback?.({ ok: false, message: '최소 3명 이상 필요합니다.' });
+    if (!room)
+      return callback?.({ ok: false, message: "방을 찾을 수 없습니다." });
+    if (room.hostId !== socket.id)
+      return callback?.({ ok: false, message: "방장만 시작할 수 있습니다." });
+    if (room.players.length < 3)
+      return callback?.({ ok: false, message: "최소 3명 이상 필요합니다." });
 
     const words = WORD_BANKS[room.category] || WORD_BANKS.everyday;
     room.word = words[Math.floor(Math.random() * words.length)];
-    room.status = 'playing';
+    room.status = "playing";
     room.votes = {};
     room.result = null;
 
     const liarIndex = Math.floor(Math.random() * room.players.length);
     room.players.forEach((p, idx) => {
-      p.role = idx === liarIndex ? 'liar' : 'normal';
+      p.role = idx === liarIndex ? "liar" : "normal";
     });
 
     callback?.({ ok: true });
@@ -163,34 +316,40 @@ io.on('connection', (socket) => {
     emitPrivateInfo(roomCode);
   });
 
-  socket.on('game:vote', ({ targetId }, callback) => {
+  socket.on("game:vote", ({ targetId }, callback) => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
-    if (!room || room.status !== 'playing') return callback?.({ ok: false, message: '투표할 수 없는 상태입니다.' });
-    const voter = room.players.find(p => p.id === socket.id);
-    const target = room.players.find(p => p.id === targetId);
-    if (!voter || !target) return callback?.({ ok: false, message: '대상을 찾을 수 없습니다.' });
+    if (!room || room.status !== "playing")
+      return callback?.({ ok: false, message: "투표할 수 없는 상태입니다." });
+    const voter = room.players.find((p) => p.id === socket.id);
+    const target = room.players.find((p) => p.id === targetId);
+    if (!voter || !target)
+      return callback?.({ ok: false, message: "대상을 찾을 수 없습니다." });
 
     room.votes[socket.id] = targetId;
 
     if (Object.keys(room.votes).length === room.players.length) {
       const counts = {};
-      Object.values(room.votes).forEach(id => counts[id] = (counts[id] || 0) + 1);
+      Object.values(room.votes).forEach(
+        (id) => (counts[id] = (counts[id] || 0) + 1)
+      );
       const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
       const topVotes = sorted.filter(([, count]) => count === sorted[0][1]);
-      const liar = room.players.find(p => p.role === 'liar');
+      const liar = room.players.find((p) => p.role === "liar");
       const selectedId = topVotes.length === 1 ? topVotes[0][0] : null;
 
-      room.status = 'ended';
+      room.status = "ended";
       room.result = {
         liarId: liar.id,
         liarNickname: liar.nickname,
         word: room.word,
         selectedId,
-        selectedNickname: selectedId ? room.players.find(p => p.id === selectedId)?.nickname : null,
+        selectedNickname: selectedId
+          ? room.players.find((p) => p.id === selectedId)?.nickname
+          : null,
         success: selectedId === liar.id,
         tie: topVotes.length > 1,
-        counts
+        counts,
       };
     }
 
@@ -199,27 +358,27 @@ io.on('connection', (socket) => {
     emitPrivateInfo(roomCode);
   });
 
-  socket.on('game:reset', () => {
+  socket.on("game:reset", () => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
     if (!room || room.hostId !== socket.id) return;
-    room.status = 'waiting';
+    room.status = "waiting";
     room.word = null;
     room.votes = {};
     room.result = null;
-    room.players.forEach(p => p.role = null);
+    room.players.forEach((p) => (p.role = null));
     emitRoom(roomCode);
     emitPrivateInfo(roomCode);
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
     if (!room) return;
 
-    room.players = room.players.filter(p => p.id !== socket.id);
+    room.players = room.players.filter((p) => p.id !== socket.id);
     delete room.votes[socket.id];
-    Object.keys(room.votes).forEach(voterId => {
+    Object.keys(room.votes).forEach((voterId) => {
       if (room.votes[voterId] === socket.id) delete room.votes[voterId];
     });
 
@@ -237,6 +396,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Liar game server running on port ${PORT}`);
 });
