@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>온라인 라이어게임</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <p class="eyebrow">10인용 미니 웹게임</p>
+      <h1>온라인 라이어게임</h1>
+      <p class="subtitle">방을 만들고 링크를 공유하면 친구들이 각자 접속해서 제시어를 확인하고 투표할 수 있어요.</p>
+    </section>
+
+    <section id="entry" class="card">
+      <h2>입장하기</h2>
+      <label>닉네임</label>
+      <input id="nickname" maxlength="12" placeholder="예: 수영" />
+      <div class="button-row">
+        <button id="createRoom">방 만들기</button>
+        <button id="joinRoom" class="secondary">링크/코드로 입장</button>
+      </div>
+      <label>방 코드</label>
+      <input id="roomCode" maxlength="5" placeholder="예: ABCD2" />
+      <p id="entryMessage" class="message"></p>
+    </section>
+
+    <section id="room" class="card hidden">
+      <div class="room-top">
+        <div>
+          <p class="eyebrow">방 코드</p>
+          <h2 id="roomTitle">-----</h2>
+        </div>
+        <button id="copyLink" class="secondary">초대 링크 복사</button>
+      </div>
+
+      <div id="hostControls" class="host-box hidden">
+        <label>제시어 카테고리</label>
+        <select id="category">
+          <option value="everyday">일상</option>
+          <option value="animal">동물</option>
+          <option value="place">장소</option>
+          <option value="food">음식</option>
+        </select>
+        <div class="button-row">
+          <button id="startGame">게임 시작</button>
+          <button id="resetGame" class="secondary hidden">다시 대기방으로</button>
+        </div>
+      </div>
+
+      <div id="myCard" class="my-card">
+        <p class="eyebrow">내 정보</p>
+        <h3 id="myStatus">대기 중입니다.</h3>
+        <p id="myDetail">방장이 게임을 시작하면 제시어가 표시됩니다.</p>
+      </div>
+
+      <div class="grid">
+        <div>
+          <h3>참가자</h3>
+          <ul id="players" class="players"></ul>
+        </div>
+        <div>
+          <h3>투표</h3>
+          <div id="voteArea" class="vote-area">게임이 시작되면 투표할 수 있어요.</div>
+        </div>
+      </div>
+
+      <div id="result" class="result hidden"></div>
+      <p id="roomMessage" class="message"></p>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

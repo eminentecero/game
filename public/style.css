@@ -1,0 +1,78 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f1ea;
+  color: #211c18;
+}
+.app {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  padding: 32px 18px 60px;
+}
+.hero { text-align: center; margin-bottom: 22px; }
+h1 { font-size: clamp(32px, 6vw, 58px); margin: 6px 0; letter-spacing: -0.06em; }
+h2, h3 { margin: 0 0 12px; letter-spacing: -0.03em; }
+.subtitle { margin: 0 auto; max-width: 620px; line-height: 1.6; color: #6b5f57; }
+.eyebrow { margin: 0 0 4px; font-size: 13px; font-weight: 800; color: #9b5c2f; letter-spacing: 0.08em; text-transform: uppercase; }
+.card {
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(70, 50, 35, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(70, 50, 35, 0.08);
+  padding: 22px;
+  margin: 18px 0;
+}
+.hidden { display: none !important; }
+label { display: block; font-weight: 800; margin: 14px 0 7px; }
+input, select {
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid #d8cabe;
+  border-radius: 14px;
+  font-size: 16px;
+  background: white;
+}
+button {
+  border: 0;
+  border-radius: 14px;
+  padding: 13px 16px;
+  background: #2e2520;
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+button.secondary { background: #e7dbcf; color: #2e2520; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.button-row { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+.room-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.host-box, .my-card, .result {
+  border-radius: 18px;
+  padding: 16px;
+  margin: 16px 0;
+  background: #fff8ef;
+  border: 1px solid #ead8c2;
+}
+.my-card { background: #2e2520; color: white; }
+.my-card .eyebrow { color: #ffc47f; }
+.my-card p { margin-bottom: 0; line-height: 1.55; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.players { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.players li, .vote-card {
+  background: white;
+  border: 1px solid #eadfd4;
+  border-radius: 14px;
+  padding: 12px 13px;
+}
+.player-name { font-weight: 900; }
+.badge { display: inline-block; margin-left: 6px; font-size: 12px; padding: 3px 7px; border-radius: 999px; background: #f0dfc9; color: #6b401f; }
+.vote-area { display: grid; gap: 8px; color: #6b5f57; }
+.vote-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.vote-card button { padding: 8px 10px; font-size: 14px; }
+.message { min-height: 22px; color: #9b3d2f; font-weight: 700; }
+.result strong { color: #9b3d2f; }
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+  .button-row button { flex: 1 1 160px; }
+}
