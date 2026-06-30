@@ -4,21 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>라이어 게임</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gugi&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
+  <div class="background-glow"></div>
+
   <main class="app">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">ONLINE PARTY GAME</p>
+    <section class="hero case-file">
+      <div class="hero-copy">
+        <p class="stamp">ONLINE LIAR GAME</p>
         <h1>라이어 게임</h1>
-        <p class="subtitle">같은 제시어를 받은 사람들 사이에 숨어 있는 한 명의 라이어를 찾아보세요.</p>
+        <p class="subtitle">모두가 같은 제시어를 알고 있습니다. 단 한 명, 라이어만 빼고요. 말투와 힌트 속에서 숨어 있는 라이어를 찾아보세요.</p>
+        <div class="hero-badges" aria-label="게임 특징">
+          <span>최대 10인</span>
+          <span>링크 초대</span>
+          <span>실시간 투표</span>
+          <span>바보 라이어 모드</span>
+        </div>
       </div>
-      <div class="hero-meta" aria-label="게임 특징">
-        <span>최대 10인</span>
-        <span>링크 초대</span>
-        <span>실시간 투표</span>
-        <span>바보 라이어 모드</span>
+      <div class="hero-card" aria-hidden="true">
+        <div class="secret-card">?</div>
+        <p>숨겨진 역할</p>
+        <strong>WHO IS LIAR?</strong>
       </div>
     </section>
 
@@ -27,13 +37,10 @@
         <p class="eyebrow">START</p>
         <h2>게임 입장</h2>
       </div>
-
       <label for="nickname">닉네임</label>
       <input id="nickname" maxlength="12" placeholder="예: 수영" autocomplete="off" />
-
       <label for="roomCode">방 코드</label>
       <input id="roomCode" maxlength="5" placeholder="초대 링크로 들어오면 자동 입력돼요" autocomplete="off" />
-
       <div class="button-row">
         <button id="createRoom">새 방 만들기</button>
         <button id="joinRoom" class="secondary">코드로 입장</button>
@@ -55,7 +62,6 @@
           <p class="eyebrow">HOST</p>
           <h3>방장 설정</h3>
         </div>
-
         <label for="category">제시어 카테고리</label>
         <select id="category">
           <option value="everyday">일상어</option>
@@ -81,8 +87,8 @@
         </div>
       </div>
 
-      <div id="myCard" class="my-card">
-        <p class="eyebrow">MY WORD</p>
+      <div id="myCard" class="my-card evidence-card">
+        <p class="eyebrow">MY CARD</p>
         <h3 id="myStatus">대기 중입니다.</h3>
         <p id="myDetail">방장이 게임을 시작하면 내 역할과 제시어가 표시됩니다.</p>
       </div>
@@ -95,7 +101,6 @@
           </div>
           <ul id="players" class="players"></ul>
         </div>
-
         <div class="sub-panel">
           <div class="section-title compact">
             <p class="eyebrow">VOTE</p>
