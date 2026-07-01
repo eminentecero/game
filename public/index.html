@@ -27,8 +27,7 @@
           <p class="kicker">RETRO MINI GAME ROOM</p>
           <h1>교생띠니<br />오락실</h1>
           <p class="subtitle">
-특정 모임 사람들끼리 가볍게 노는 온라인 오락실. 오늘의 게임을 고르고,
-            닉네임만 입력해 바로 입장하세요.
+            오늘의 게임을 고르고, 닉네임만 입력해 바로 입장하세요.
           </p>
         </div>
 
@@ -57,17 +56,24 @@
 
       <section id="entry" class="panel entry-panel hidden">
         <div class="entry-topline">
-          <button id="backToArcade" class="secondary tiny" type="button">← 게임 선택</button>
+          <button id="backToArcade" class="secondary tiny" type="button">
+            ← 게임 선택
+          </button>
         </div>
         <div class="section-title">
           <p class="eyebrow">INSERT COIN</p>
           <h2 id="selectedGameTitle">라이어 게임 입장</h2>
           <p id="selectedGameDesc" class="section-desc">
-닉네임을 입력하면 선택한 게임방에 바로 입장합니다.
+            닉네임을 입력하면 선택한 게임방에 바로 입장합니다.
           </p>
         </div>
         <label for="nickname">닉네임</label>
-        <input id="nickname" maxlength="12" placeholder="예: 수영" autocomplete="off" />
+        <input
+          id="nickname"
+          maxlength="12"
+          placeholder="예: 수영"
+          autocomplete="off"
+        />
 
         <div class="button-row">
           <button id="enterRoom">게임방 입장</button>
@@ -83,7 +89,9 @@
             <p id="roomGameLabel" class="room-game-label">라이어 게임</p>
           </div>
           <div class="room-actions">
-            <button id="backHome" class="secondary" type="button">오락실 홈</button>
+            <button id="backHome" class="secondary" type="button">
+              오락실 홈
+            </button>
           </div>
         </div>
 
@@ -108,20 +116,30 @@
               <input id="foolMode" type="checkbox" />
               <span>
                 <strong>바보 라이어 모드</strong>
-                <small>라이어도 자신이 라이어인지 모른 채, 같은 카테고리의 다른 제시어를 받습니다.</small>
+                <small
+                  >라이어도 자신이 라이어인지 모른 채, 같은 카테고리의 다른
+                  제시어를 받습니다.</small
+                >
               </span>
             </label>
           </div>
 
           <div id="yangSettings" class="yang-guide hidden">
             <strong>양세찬 게임 준비</strong>
-            <p>모든 플레이어가 제시어를 하나씩 입력하면 방장이 게임을 시작할 수 있어요.</p>
+            <p>
+              모든 플레이어가 제시어를 하나씩 입력하면 방장이 게임을 시작할 수
+              있어요.
+            </p>
           </div>
 
           <div class="button-row">
             <button id="startGame">게임 시작</button>
-            <button id="finishYangGame" class="secondary hidden" type="button">양세찬 게임 종료</button>
-            <button id="resetGame" class="secondary hidden" type="button">다시 대기방으로</button>
+            <button id="finishYangGame" class="secondary hidden" type="button">
+              양세찬 게임 종료
+            </button>
+            <button id="resetGame" class="secondary hidden" type="button">
+              다시 대기방으로
+            </button>
           </div>
         </div>
 
@@ -130,9 +148,17 @@
             <p class="eyebrow">MY KEYWORD</p>
             <h3>내 제시어 입력</h3>
           </div>
-          <p class="hint-text">입력한 단어는 섞여서 다른 사람에게 배정돼요. 본인에게는 돌아오지 않게 처리됩니다.</p>
+          <p class="hint-text">
+            입력한 단어는 섞여서 다른 사람에게 배정돼요. 본인에게는 돌아오지
+            않게 처리됩니다.
+          </p>
           <div class="inline-form">
-            <input id="yangWordInput" maxlength="20" placeholder="예: 아이유, 손흥민, 마동석" autocomplete="off" />
+            <input
+              id="yangWordInput"
+              maxlength="20"
+              placeholder="예: 아이유, 손흥민, 마동석"
+              autocomplete="off"
+            />
             <button id="submitYangWord" type="button">제출</button>
           </div>
           <p id="yangMessage" class="message"></p>
@@ -144,16 +170,22 @@
           <p id="myDetail">방장이 게임을 시작하면 카드가 표시됩니다.</p>
         </div>
 
-
-
         <div id="yangGuessBox" class="sub-panel yang-guess hidden">
           <div class="section-title compact">
             <p class="eyebrow">MY GUESS</p>
             <h3>내 제시어 맞히기</h3>
           </div>
-          <p class="hint-text">질문을 통해 알아낸 내 제시어를 입력해 보세요. 띄어쓰기는 달라도 정답 처리됩니다.</p>
+          <p class="hint-text">
+            질문을 통해 알아낸 내 제시어를 입력해 보세요. 띄어쓰기는 달라도 정답
+            처리됩니다.
+          </p>
           <div class="inline-form">
-            <input id="yangGuessInput" maxlength="20" placeholder="내 제시어는 무엇일까?" autocomplete="off" />
+            <input
+              id="yangGuessInput"
+              maxlength="20"
+              placeholder="내 제시어는 무엇일까?"
+              autocomplete="off"
+            />
             <button id="submitYangGuess" type="button">정답 제출</button>
           </div>
           <p id="yangGuessMessage" class="message"></p>
@@ -180,7 +212,9 @@
               <p class="eyebrow">VOTE</p>
               <h3>라이어 지목</h3>
             </div>
-            <div id="voteArea" class="vote-area">게임이 시작되면 투표할 수 있어요.</div>
+            <div id="voteArea" class="vote-area">
+              게임이 시작되면 투표할 수 있어요.
+            </div>
           </div>
         </div>
 
