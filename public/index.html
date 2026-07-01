@@ -1,121 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>라이어 게임</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gugi&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <div class="background-glow"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>라이어 게임</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gugi&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="background-glow"></div>
 
-  <main class="app">
-    <section class="hero case-file">
-      <div class="hero-copy">
-        <p class="stamp">ONLINE LIAR GAME</p>
-        <h1>라이어 게임</h1>
-        <p class="subtitle">모두가 같은 제시어를 알고 있습니다. 단 한 명, 라이어만 빼고요. 말투와 힌트 속에서 숨어 있는 라이어를 찾아보세요.</p>
-        <div class="hero-badges" aria-label="게임 특징">
-          <span>최대 10인</span>
-          <span>링크 초대</span>
-          <span>실시간 투표</span>
-          <span>바보 라이어 모드</span>
+    <main class="app">
+      <section class="hero case-file">
+        <div class="hero-copy">
+          <p class="stamp">ONLINE LIAR GAME</p>
+          <h1>라이어 게임</h1>
+          <p class="subtitle">
+            모두가 같은 제시어를 알고 있습니다. 단 한 명, 라이어만 빼고요.
+            말투와 힌트 속에서 숨어 있는 라이어를 찾아보세요.
+          </p>
+          <div class="hero-badges" aria-label="게임 특징">
+            <span>최대 10인</span>
+            <span>링크 초대</span>
+            <span>실시간 투표</span>
+          </div>
         </div>
-      </div>
-      <div class="hero-card" aria-hidden="true">
-        <div class="secret-card">?</div>
-        <p>숨겨진 역할</p>
-        <strong>WHO IS LIAR?</strong>
-      </div>
-    </section>
-
-    <section id="entry" class="panel entry-panel">
-      <div class="section-title">
-        <p class="eyebrow">START</p>
-        <h2>게임 입장</h2>
-      </div>
-      <label for="nickname">닉네임</label>
-      <input id="nickname" maxlength="12" placeholder="예: 수영" autocomplete="off" />
-      <label for="roomCode">방 코드</label>
-      <input id="roomCode" maxlength="5" placeholder="초대 링크로 들어오면 자동 입력돼요" autocomplete="off" />
-      <div class="button-row">
-        <button id="createRoom">새 방 만들기</button>
-        <button id="joinRoom" class="secondary">코드로 입장</button>
-      </div>
-      <p id="entryMessage" class="message"></p>
-    </section>
-
-    <section id="room" class="panel room-panel hidden">
-      <div class="room-top">
-        <div>
-          <p class="eyebrow">ROOM CODE</p>
-          <h2 id="roomTitle">-----</h2>
+        <div class="hero-card" aria-hidden="true">
+          <div class="secret-card">?</div>
+          <p>숨겨진 역할</p>
+          <strong>WHO IS LIAR?</strong>
         </div>
-        <button id="copyLink" class="secondary">초대 링크 복사</button>
-      </div>
+      </section>
 
-      <div id="hostControls" class="host-box hidden">
-        <div class="section-title compact">
-          <p class="eyebrow">HOST</p>
-          <h3>방장 설정</h3>
+      <section id="entry" class="panel entry-panel">
+        <div class="section-title">
+          <p class="eyebrow">START</p>
+          <h2>게임 입장</h2>
         </div>
-        <label for="category">제시어 카테고리</label>
-        <select id="category">
-          <option value="everyday">일상어</option>
-          <option value="animal">동물</option>
-          <option value="place">장소</option>
-          <option value="food">음식</option>
-          <option value="job">직업</option>
-          <option value="movie">영화 제목</option>
-          <option value="funnySituation">웃긴 상황</option>
-        </select>
-
-        <label class="mode-toggle" for="dumbLiarMode">
-          <input id="dumbLiarMode" type="checkbox" />
-          <span>
-            <strong>바보 라이어 모드</strong>
-            <small>라이어에게 같은 카테고리의 다른 단어를 보여줍니다.</small>
-          </span>
-        </label>
-
+        <label for="nickname">닉네임</label>
+        <input
+          id="nickname"
+          maxlength="12"
+          placeholder="예: 수영"
+          autocomplete="off"
+        />
+        <label for="roomCode">방 코드</label>
+        <input
+          id="roomCode"
+          maxlength="5"
+          placeholder="초대 링크로 들어오면 자동 입력돼요"
+          autocomplete="off"
+        />
         <div class="button-row">
-          <button id="startGame">게임 시작</button>
-          <button id="resetGame" class="secondary hidden">다시 대기방으로</button>
+          <button id="createRoom">새 방 만들기</button>
+          <button id="joinRoom" class="secondary">코드로 입장</button>
         </div>
-      </div>
+        <p id="entryMessage" class="message"></p>
+      </section>
 
-      <div id="myCard" class="my-card evidence-card">
-        <p class="eyebrow">MY CARD</p>
-        <h3 id="myStatus">대기 중입니다.</h3>
-        <p id="myDetail">방장이 게임을 시작하면 내 역할과 제시어가 표시됩니다.</p>
-      </div>
-
-      <div class="grid">
-        <div class="sub-panel">
-          <div class="section-title compact">
-            <p class="eyebrow">PLAYERS</p>
-            <h3>참가자</h3>
+      <section id="room" class="panel room-panel hidden">
+        <div class="room-top">
+          <div>
+            <p class="eyebrow">ROOM CODE</p>
+            <h2 id="roomTitle">-----</h2>
           </div>
-          <ul id="players" class="players"></ul>
+          <button id="copyLink" class="secondary">초대 링크 복사</button>
         </div>
-        <div class="sub-panel">
+
+        <div id="hostControls" class="host-box hidden">
           <div class="section-title compact">
-            <p class="eyebrow">VOTE</p>
-            <h3>라이어 지목</h3>
+            <p class="eyebrow">HOST</p>
+            <h3>방장 설정</h3>
           </div>
-          <div id="voteArea" class="vote-area">게임이 시작되면 투표할 수 있어요.</div>
+          <label for="category">제시어 카테고리</label>
+          <select id="category">
+            <option value="animal">동물</option>
+            <option value="place">장소</option>
+            <option value="food">음식</option>
+            <option value="job">직업</option>
+            <option value="movie">영화 제목</option>
+            <option value="situation">웃긴 상황</option>
+          </select>
+
+          <div class="button-row">
+            <button id="startGame">게임 시작</button>
+            <button id="resetGame" class="secondary hidden">
+              다시 대기방으로
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div id="result" class="result hidden"></div>
-      <p id="roomMessage" class="message"></p>
-    </section>
-  </main>
+        <div id="myCard" class="my-card evidence-card">
+          <p class="eyebrow">MY CARD</p>
+          <h3 id="myStatus">대기 중입니다.</h3>
+          <p id="myDetail">
+            방장이 게임을 시작하면 내 역할과 제시어가 표시됩니다.
+          </p>
+        </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/app.js"></script>
-</body>
+        <div class="grid">
+          <div class="sub-panel">
+            <div class="section-title compact">
+              <p class="eyebrow">PLAYERS</p>
+              <h3>참가자</h3>
+            </div>
+            <ul id="players" class="players"></ul>
+          </div>
+          <div class="sub-panel">
+            <div class="section-title compact">
+              <p class="eyebrow">VOTE</p>
+              <h3>라이어 지목</h3>
+            </div>
+            <div id="voteArea" class="vote-area">
+              게임이 시작되면 투표할 수 있어요.
+            </div>
+          </div>
+        </div>
+
+        <div id="result" class="result hidden"></div>
+        <p id="roomMessage" class="message"></p>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js"></script>
+  </body>
 </html>
