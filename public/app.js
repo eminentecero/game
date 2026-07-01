@@ -349,7 +349,6 @@ function renderYangBoard() {
     list.appendChild(card);
   });
 }
-
 function renderResult() {
   const resultBox = $("result");
 
@@ -390,19 +389,37 @@ function renderResult() {
   let wordHtml = "";
 
   if (r.foolMode) {
-    const liarWordHtml = showResultWord
-      ? `<p>바보 라이어 제시어는 <strong>${escapeHtml(
-          r.liarWord
-        )}</strong>였습니다.</p>`
-      : `
-        <p>바보 라이어 제시어는 아직 공개되지 않았습니다.</p>
-        <button id="showResultWord" type="button">라이어의 제시어는?</button>
-      `;
-
-    wordHtml = `
-      <p>시민 제시어는 <strong>${escapeHtml(r.word)}</strong>였습니다.</p>
-      ${liarWordHtml}
-    `;
+    if (isLiar) {
+      wordHtml = showResultWord
+        ? `
+          <p>당신에게 제시된 단어는 <strong>${escapeHtml(
+            r.liarWord
+          )}</strong>였습니다.</p>
+          <p>다른 사람들의 제시어는 <strong>${escapeHtml(
+            r.word
+          )}</strong>였습니다.</p>
+        `
+        : `
+          <p>당신에게 제시된 단어는 <strong>${escapeHtml(
+            r.liarWord
+          )}</strong>였습니다.</p>
+          <p>다른 사람들의 제시어는 아직 공개되지 않았습니다.</p>
+          <button id="showResultWord" type="button">다른 사람들의 제시어는?</button>
+        `;
+    } else {
+      wordHtml = showResultWord
+        ? `
+          <p>시민 제시어는 <strong>${escapeHtml(r.word)}</strong>였습니다.</p>
+          <p>바보 라이어 제시어는 <strong>${escapeHtml(
+            r.liarWord
+          )}</strong>였습니다.</p>
+        `
+        : `
+          <p>시민 제시어는 <strong>${escapeHtml(r.word)}</strong>였습니다.</p>
+          <p>바보 라이어 제시어는 아직 공개되지 않았습니다.</p>
+          <button id="showResultWord" type="button">라이어의 제시어는?</button>
+        `;
+    }
   } else if (isLiar && !showResultWord) {
     wordHtml = `
       <p>제시어는 아직 공개되지 않았습니다.</p>
@@ -431,7 +448,6 @@ function renderResult() {
     });
   }
 }
-
 function enterGameRoom() {
   setMessage(entryMessage, "");
 
