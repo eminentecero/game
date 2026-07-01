@@ -10,7 +10,6 @@ const entry = $("entry");
 const roomSection = $("room");
 const home = $("home");
 const nicknameInput = $("nickname");
-const roomCodeInput = $("roomCode");
 const entryMessage = $("entryMessage");
 const roomMessage = $("roomMessage");
 const yangMessage = $("yangMessage");
@@ -20,12 +19,12 @@ const GAME_META = {
   liar: {
     title: "라이어 게임 입장",
     label: "라이어 게임",
-    desc: "한 명만 정답을 모르는 게임. 일반 모드와 바보 라이어 모드를 지원해요.",
+    desc: "닉네임만 입력하면 라이어 게임방에 바로 입장해요.",
   },
   yang: {
     title: "양세찬 게임 입장",
     label: "양세찬 게임",
-    desc: "내 제시어만 나만 모르는 게임. 각자 제시어를 입력한 뒤 무작위로 배정돼요.",
+    desc: "닉네임만 입력하면 양세찬 게임방에 바로 입장해요.",
   },
 };
 
@@ -89,8 +88,8 @@ function updateRoom(room) {
   showRoom();
 
   const isLiarGame = room.gameType !== "yang";
-  $("roomTitle").textContent = room.code;
-  $("roomGameLabel").textContent = GAME_META[room.gameType]?.label || "게임방";
+  $("roomTitle").textContent = GAME_META[room.gameType]?.label || "게임방";
+  $("roomGameLabel").textContent = "공용 게임방";
 
   $("liarSettings").classList.toggle("hidden", !isLiarGame);
   $("yangSettings").classList.toggle("hidden", isLiarGame);
@@ -315,20 +314,11 @@ function renderResult() {
   }
 }
 
-function createRoom() {
+function enterGameRoom() {
   setMessage(entryMessage, "");
-  socket.emit("room:create", { nickname: nicknameInput.value, gameType: selectedGameType }, (res) => {
+  socket.emit("room:enter", { nickname: nicknameInput.value, gameType: selectedGameType }, (res) => {
     if (!res.ok) return setMessage(entryMessage, res.message);
-    history.pushState(null, "", `/room/${res.code}`);
-  });
-}
-
-function joinRoom() {
-  setMessage(entryMessage, "");
-  const code = (roomCodeInput.value || getCodeFromPath()).toUpperCase();
-  socket.emit("room:join", { code, nickname: nicknameInput.value }, (res) => {
-    if (!res.ok) return setMessage(entryMessage, res.message);
-    history.pushState(null, "", `/room/${res.code}`);
+    history.pushState(null, "", `/${res.gameType}`);
   });
 }
 
@@ -376,8 +366,10 @@ document.querySelectorAll("[data-game-card]").forEach((card) => {
 });
 $("backToArcade").addEventListener("click", showArcadeHome);
 
-$("createRoom").addEventListener("click", createRoom);
-$("joinRoom").addEventListener("click", joinRoom);
+$("enterRoom").addEventListener("click", enterGameRoom);
+nicknameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") enterGameRoom();
+});
 $("startGame").addEventListener("click", startGame);
 $("resetGame").addEventListener("click", () => socket.emit("game:reset"));
 $("finishYangGame").addEventListener("click", () => socket.emit("yang:finish"));
@@ -391,11 +383,6 @@ $("yangGuessInput").addEventListener("keydown", (e) => {
 });
 $("category").addEventListener("change", (e) => socket.emit("game:setCategory", { category: e.target.value }));
 $("foolMode").addEventListener("change", (e) => socket.emit("game:setFoolMode", { enabled: e.target.checked }));
-$("copyLink").addEventListener("click", async () => {
-  const link = `${location.origin}/room/${currentRoom.code}`;
-  await navigator.clipboard.writeText(link);
-  setMessage(roomMessage, "초대 링크를 복사했어요.");
-});
 $("backHome").addEventListener("click", () => {
   history.pushState(null, "", "/");
   currentRoom = null;
@@ -408,11 +395,8 @@ socket.on("me:update", updateMe);
 
 selectGame("liar");
 showArcadeHome();
-const initialCode = getCodeFromPath();
-if (initialCode) {
-  roomCodeInput.value = initialCode;
-  home.classList.add("hidden");
-  entry.classList.remove("hidden");
-  roomSection.classList.add("hidden");
+const pathGame = location.pathname.replace("/", "");
+if (pathGame === "liar" || pathGame === "yang") {
+  showEntryOnly(pathGame);
   setMessage(entryMessage, "닉네임을 입력한 뒤 입장해 주세요.");
 }

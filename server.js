@@ -181,11 +181,90 @@ app.get("/healthz", (req, res) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/room/:code", (req, res) => {
+app.get(["/liar", "/yang", "/room/:code"], (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+function getDefaultRoomCode(gameType) {
+  return gameType === "yang" ? "YANG" : "LIAR";
+}
+
+function createSharedRoom(socket, nickname, gameType) {
+  const type = gameType === "yang" ? "yang" : "liar";
+  const code = getDefaultRoomCode(type);
+  const room = {
+    code,
+    hostId: socket.id,
+    status: "waiting",
+    gameType: type,
+    category: "animal",
+    foolMode: false,
+    word: null,
+    liarWord: null,
+    players: [
+      {
+        id: socket.id,
+        nickname,
+        role: null,
+        connected: true,
+        yangSubmission: "",
+        yangWord: null,
+        yangSolved: false,
+      },
+    ],
+    votes: {},
+    result: null,
+  };
+
+  rooms.set(code, room);
+  socket.join(code);
+  socket.data.roomCode = code;
+  return room;
+}
+
+function joinSharedRoom(socket, room, nickname) {
+  room.players.push({
+    id: socket.id,
+    nickname,
+    role: null,
+    connected: true,
+    yangSubmission: "",
+    yangWord: null,
+    yangSolved: false,
+  });
+  socket.join(room.code);
+  socket.data.roomCode = room.code;
+}
+
 io.on("connection", (socket) => {
+  socket.on("room:enter", ({ nickname, gameType }, callback) => {
+    const cleanName = String(nickname || "").trim().slice(0, 12);
+    if (!cleanName) return callback?.({ ok: false, message: "닉네임을 입력해 주세요." });
+
+    const type = gameType === "yang" ? "yang" : "liar";
+    const code = getDefaultRoomCode(type);
+    let room = rooms.get(code);
+
+    if (!room) {
+      room = createSharedRoom(socket, cleanName, type);
+    } else {
+      if (room.status !== "waiting") {
+        return callback?.({ ok: false, message: "지금은 게임이 진행 중이에요. 끝난 뒤 다시 입장해 주세요." });
+      }
+      if (room.players.length >= 10) {
+        return callback?.({ ok: false, message: "최대 10명까지만 입장할 수 있습니다." });
+      }
+      if (room.players.some((p) => p.nickname === cleanName)) {
+        return callback?.({ ok: false, message: "이미 사용 중인 닉네임입니다." });
+      }
+      joinSharedRoom(socket, room, cleanName);
+    }
+
+    callback?.({ ok: true, code, gameType: type });
+    emitRoom(code);
+    emitPrivateInfo(code);
+  });
+
   socket.on("room:create", ({ nickname, gameType }, callback) => {
     const cleanName = String(nickname || "").trim().slice(0, 12);
     if (!cleanName) return callback?.({ ok: false, message: "닉네임을 입력해 주세요." });
