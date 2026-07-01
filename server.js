@@ -138,6 +138,7 @@ function getPublicRoom(room) {
     hostId: room.hostId,
     status: room.status,
     category: room.category,
+    foolMode: room.foolMode,
     players: room.players.map((p) => ({
       id: p.id,
       nickname: p.nickname,
@@ -159,23 +160,33 @@ function getMyInfo(room, socketId) {
   const player = room.players.find((p) => p.id === socketId);
   if (!player) return null;
 
+  const gameIsVisible = room.status === "playing" || room.status === "ended";
+  const isPlayingFoolMode = room.foolMode && room.status === "playing";
+
   return {
     id: player.id,
     nickname: player.nickname,
     isHost: player.id === room.hostId,
-    role:
-      room.status === "playing" || room.status === "ended" ? player.role : null,
-    word:
-      room.status === "playing" || room.status === "ended"
+
+    // 바보 라이어 모드에서는 게임 중에 라이어도 본인이 라이어인지 몰라야 하므로
+    // 클라이언트에는 모두 normal처럼 보냅니다. 종료 후에는 실제 역할을 공개합니다.
+    role: gameIsVisible ? (isPlayingFoolMode ? "normal" : player.role) : null,
+
+    // 기본 모드: 라이어에게 단어를 주지 않음.
+    // 바보 라이어 모드: 라이어에게도 같은 카테고리의 다른 단어를 줌.
+    word: gameIsVisible
+      ? room.foolMode
         ? player.role === "liar"
-          ? null
+          ? room.liarWord
           : room.word
-        : null,
+        : player.role === "liar"
+        ? null
+        : room.word
+      : null,
+
     liarHint:
-      room.status === "playing" || room.status === "ended"
-        ? player.role === "liar"
-          ? "당신은 라이어입니다. 다른 사람들의 설명을 듣고 제시어를 추리하세요."
-          : null
+      gameIsVisible && !room.foolMode && player.role === "liar"
+        ? "당신은 라이어입니다. 다른 사람들의 설명을 듣고 제시어를 추리하세요."
         : null,
   };
 }
@@ -217,7 +228,9 @@ io.on("connection", (socket) => {
       hostId: socket.id,
       status: "waiting",
       category: "animal",
+      foolMode: false,
       word: null,
+      liarWord: null,
       players: [
         { id: socket.id, nickname: cleanName, role: null, connected: true },
       ],
@@ -278,6 +291,15 @@ io.on("connection", (socket) => {
     emitRoom(roomCode);
   });
 
+  socket.on("game:setFoolMode", ({ enabled }) => {
+    const roomCode = socket.data.roomCode;
+    const room = rooms.get(roomCode);
+    if (!room || room.hostId !== socket.id || room.status !== "waiting") return;
+    room.foolMode = Boolean(enabled);
+    emitRoom(roomCode);
+    emitPrivateInfo(roomCode);
+  });
+
   socket.on("game:start", (callback) => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
@@ -288,8 +310,24 @@ io.on("connection", (socket) => {
     if (room.players.length < 3)
       return callback?.({ ok: false, message: "최소 3명 이상 필요합니다." });
 
-    const words = WORD_BANKS[room.category] || WORD_BANKS.everyday;
-    room.word = words[Math.floor(Math.random() * words.length)];
+    const words = WORD_BANKS[room.category] || WORD_BANKS.animal;
+    if (room.foolMode && words.length < 2) {
+      return callback?.({
+        ok: false,
+        message: "바보 라이어 모드는 카테고리에 단어가 최소 2개 이상 필요합니다.",
+      });
+    }
+
+    const normalWord = words[Math.floor(Math.random() * words.length)];
+    let liarWord = null;
+
+    if (room.foolMode) {
+      const liarCandidates = words.filter((word) => word !== normalWord);
+      liarWord = liarCandidates[Math.floor(Math.random() * liarCandidates.length)];
+    }
+
+    room.word = normalWord;
+    room.liarWord = liarWord;
     room.status = "playing";
     room.votes = {};
     room.result = null;
@@ -331,6 +369,8 @@ io.on("connection", (socket) => {
         liarId: liar.id,
         liarNickname: liar.nickname,
         word: room.word,
+        liarWord: room.liarWord,
+        foolMode: room.foolMode,
         selectedId,
         selectedNickname: selectedId
           ? room.players.find((p) => p.id === selectedId)?.nickname
@@ -352,6 +392,7 @@ io.on("connection", (socket) => {
     if (!room || room.hostId !== socket.id) return;
     room.status = "waiting";
     room.word = null;
+    room.liarWord = null;
     room.votes = {};
     room.result = null;
     room.players.forEach((p) => (p.role = null));

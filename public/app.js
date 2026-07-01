@@ -38,12 +38,14 @@ function updateRoom(room) {
   showRoom();
   $("roomTitle").textContent = room.code;
   $("category").value = room.category;
+  if ($("foolMode")) $("foolMode").checked = Boolean(room.foolMode);
 
   const isHost = me && me.isHost;
   $("hostControls").classList.toggle("hidden", !isHost);
   $("startGame").classList.toggle("hidden", room.status !== "waiting");
   $("resetGame").classList.toggle("hidden", room.status === "waiting");
   $("category").disabled = room.status !== "waiting";
+  if ($("foolMode")) $("foolMode").disabled = room.status !== "waiting";
 
   renderPlayers(room.players);
   renderVoteArea();
@@ -77,8 +79,9 @@ function renderMyCard() {
       "다른 사람의 설명을 듣고 제시어를 추리하세요. 너무 티 나지 않게 말하는 게 핵심!";
   } else {
     title.textContent = `제시어: ${me.word}`;
-    detail.textContent =
-      "라이어가 눈치채지 못하게, 너무 직접적이지 않게 설명해 보세요.";
+    detail.textContent = currentRoom.foolMode
+      ? "모든 사람에게 제시어가 표시됩니다. 단, 누군가는 같은 카테고리의 다른 단어를 받았을 수 있어요."
+      : "라이어가 눈치채지 못하게, 너무 직접적이지 않게 설명해 보세요.";
   }
 }
 
@@ -159,6 +162,11 @@ function renderResult() {
       <p>제시어는 아직 공개되지 않았습니다.</p>
       <button id="showResultWord" type="button">제시어 보기</button>
     `;
+  } else if (r.foolMode) {
+    wordHtml = `
+      <p>시민 제시어는 <strong>${escapeHtml(r.word)}</strong>였습니다.</p>
+      <p>바보 라이어 제시어는 <strong>${escapeHtml(r.liarWord)}</strong>였습니다.</p>
+    `;
   } else {
     wordHtml = `
       <p>제시어는 <strong>${escapeHtml(r.word)}</strong>였습니다.</p>
@@ -227,6 +235,11 @@ $("resetGame").addEventListener("click", () => socket.emit("game:reset"));
 $("category").addEventListener("change", (e) =>
   socket.emit("game:setCategory", { category: e.target.value })
 );
+if ($("foolMode")) {
+  $("foolMode").addEventListener("change", (e) =>
+    socket.emit("game:setFoolMode", { enabled: e.target.checked })
+  );
+}
 $("copyLink").addEventListener("click", async () => {
   const link = `${location.origin}/room/${currentRoom.code}`;
   await navigator.clipboard.writeText(link);
