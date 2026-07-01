@@ -1,11 +1,7 @@
 services:
   - type: web
-    name: liar-game-online
-    runtime: node
-    plan: free
+    name: gyosaeng-ttini-arcade
+    env: node
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /healthz
-    envVars:
-      - key: NODE_VERSION
-        value: 20
+    plan: free

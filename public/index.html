@@ -3,52 +3,69 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>라이어 게임</title>
+    <title>교생띠니 오락실</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gugi&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <div class="background-glow"></div>
+    <div class="scanline" aria-hidden="true"></div>
+    <div class="pixel-stars" aria-hidden="true"></div>
 
     <main class="app">
-      <section class="hero case-file">
-        <div class="hero-copy">
-          <p class="stamp">ONLINE LIAR GAME</p>
-          <h1>라이어 게임</h1>
-          <p class="subtitle">
-            모두가 같은 제시어를 알고 있습니다. 단 한 명, 라이어만 빼고요.
-            말투와 힌트 속에서 숨어 있는 라이어를 찾아보세요.
-          </p>
-          <div class="hero-badges" aria-label="게임 특징">
-            <span>최대 10인</span>
-            <span>링크 초대</span>
-            <span>실시간 투표</span>
-          </div>
+      <section id="home" class="arcade-hero">
+        <div class="marquee">
+          <span>NEW GAME</span>
+          <span>ONLINE ROOM</span>
+          <span>MAX 10 PLAYERS</span>
         </div>
-        <div class="hero-card" aria-hidden="true">
-          <div class="secret-card">?</div>
-          <p>숨겨진 역할</p>
-          <strong>WHO IS LIAR?</strong>
+        <div class="neon-sign">
+          <p class="kicker">RETRO MINI GAME ROOM</p>
+          <h1>교생띠니<br />오락실</h1>
+          <p class="subtitle">
+            링크 하나로 모여서 가볍게 노는 온라인 오락실. 오늘의 게임을 고르고,
+            방을 만들어 친구들을 초대하세요.
+          </p>
+        </div>
+
+        <div class="game-cabinet-grid" aria-label="게임 선택">
+          <article class="cabinet selected" data-game-card="liar">
+            <div class="cabinet-screen">
+              <span class="pixel-icon">?</span>
+              <strong>LIAR</strong>
+            </div>
+            <h2>라이어 게임</h2>
+            <p>한 명만 모르는 제시어. 말 속에서 라이어를 찾아내는 게임.</p>
+            <button type="button" data-select-game="liar">이 게임 선택</button>
+          </article>
+
+          <article class="cabinet" data-game-card="yang">
+            <div class="cabinet-screen">
+              <span class="pixel-icon">!</span>
+              <strong>GUESS</strong>
+            </div>
+            <h2>양세찬 게임</h2>
+            <p>내 머리 위 단어만 나만 모른다. 질문으로 정체를 맞혀보는 게임.</p>
+            <button type="button" data-select-game="yang">이 게임 선택</button>
+          </article>
         </div>
       </section>
 
       <section id="entry" class="panel entry-panel">
         <div class="section-title">
-          <p class="eyebrow">START</p>
-          <h2>게임 입장</h2>
+          <p class="eyebrow">INSERT COIN</p>
+          <h2 id="selectedGameTitle">라이어 게임 입장</h2>
+          <p id="selectedGameDesc" class="section-desc">
+            새 방을 만들거나 초대받은 방 코드로 입장하세요.
+          </p>
         </div>
         <label for="nickname">닉네임</label>
-        <input
-          id="nickname"
-          maxlength="12"
-          placeholder="예: 수영"
-          autocomplete="off"
-        />
+        <input id="nickname" maxlength="12" placeholder="예: 수영" autocomplete="off" />
+
         <label for="roomCode">방 코드</label>
         <input
           id="roomCode"
@@ -56,6 +73,7 @@
           placeholder="초대 링크로 들어오면 자동 입력돼요"
           autocomplete="off"
         />
+
         <div class="button-row">
           <button id="createRoom">새 방 만들기</button>
           <button id="joinRoom" class="secondary">코드로 입장</button>
@@ -68,47 +86,77 @@
           <div>
             <p class="eyebrow">ROOM CODE</p>
             <h2 id="roomTitle">-----</h2>
+            <p id="roomGameLabel" class="room-game-label">라이어 게임</p>
           </div>
-          <button id="copyLink" class="secondary">초대 링크 복사</button>
+          <div class="room-actions">
+            <button id="backHome" class="secondary" type="button">오락실 홈</button>
+            <button id="copyLink" class="secondary" type="button">초대 링크 복사</button>
+          </div>
         </div>
 
         <div id="hostControls" class="host-box hidden">
           <div class="section-title compact">
-            <p class="eyebrow">HOST</p>
+            <p class="eyebrow">HOST MENU</p>
             <h3>방장 설정</h3>
           </div>
-          <label for="category">제시어 카테고리</label>
-          <select id="category">
-            <option value="animal">동물</option>
-            <option value="place">장소</option>
-            <option value="food">음식</option>
-            <option value="job">직업</option>
-            <option value="movie">영화 제목</option>
-            <option value="situation">웃긴 상황</option>
-          </select>
 
-          <label class="mode-toggle" for="foolMode">
-            <input id="foolMode" type="checkbox" />
-            <span>
-              <strong>바보 라이어 모드</strong>
-              <small>라이어도 자신이 라이어인지 모른 채, 같은 카테고리의 다른 제시어를 받습니다.</small>
-            </span>
-          </label>
+          <div id="liarSettings">
+            <label for="category">제시어 카테고리</label>
+            <select id="category">
+              <option value="animal">동물</option>
+              <option value="place">장소</option>
+              <option value="food">음식</option>
+              <option value="job">직업</option>
+              <option value="movie">영화 제목</option>
+              <option value="situation">웃긴 상황</option>
+            </select>
+
+            <label class="mode-toggle" for="foolMode">
+              <input id="foolMode" type="checkbox" />
+              <span>
+                <strong>바보 라이어 모드</strong>
+                <small>라이어도 자신이 라이어인지 모른 채, 같은 카테고리의 다른 제시어를 받습니다.</small>
+              </span>
+            </label>
+          </div>
+
+          <div id="yangSettings" class="yang-guide hidden">
+            <strong>양세찬 게임 준비</strong>
+            <p>모든 플레이어가 제시어를 하나씩 입력하면 방장이 게임을 시작할 수 있어요.</p>
+          </div>
 
           <div class="button-row">
             <button id="startGame">게임 시작</button>
-            <button id="resetGame" class="secondary hidden">
-              다시 대기방으로
-            </button>
+            <button id="finishYangGame" class="secondary hidden" type="button">양세찬 게임 종료</button>
+            <button id="resetGame" class="secondary hidden" type="button">다시 대기방으로</button>
           </div>
         </div>
 
-        <div id="myCard" class="my-card evidence-card">
-          <p class="eyebrow">MY CARD</p>
+        <div id="yangSubmission" class="sub-panel yang-submit hidden">
+          <div class="section-title compact">
+            <p class="eyebrow">MY KEYWORD</p>
+            <h3>내 제시어 입력</h3>
+          </div>
+          <p class="hint-text">입력한 단어는 섞여서 다른 사람에게 배정돼요. 본인에게는 돌아오지 않게 처리됩니다.</p>
+          <div class="inline-form">
+            <input id="yangWordInput" maxlength="20" placeholder="예: 아이유, 손흥민, 마동석" autocomplete="off" />
+            <button id="submitYangWord" type="button">제출</button>
+          </div>
+          <p id="yangMessage" class="message"></p>
+        </div>
+
+        <div id="myCard" class="my-card">
+          <p class="eyebrow">PLAYER CARD</p>
           <h3 id="myStatus">대기 중입니다.</h3>
-          <p id="myDetail">
-            방장이 게임을 시작하면 내 역할과 제시어가 표시됩니다.
-          </p>
+          <p id="myDetail">방장이 게임을 시작하면 카드가 표시됩니다.</p>
+        </div>
+
+        <div id="yangBoard" class="sub-panel hidden">
+          <div class="section-title compact">
+            <p class="eyebrow">WORD BOARD</p>
+            <h3>다른 사람의 제시어</h3>
+          </div>
+          <div id="yangBoardList" class="yang-board-list"></div>
         </div>
 
         <div class="grid">
@@ -119,14 +167,12 @@
             </div>
             <ul id="players" class="players"></ul>
           </div>
-          <div class="sub-panel">
+          <div id="votePanel" class="sub-panel">
             <div class="section-title compact">
               <p class="eyebrow">VOTE</p>
               <h3>라이어 지목</h3>
             </div>
-            <div id="voteArea" class="vote-area">
-              게임이 시작되면 투표할 수 있어요.
-            </div>
+            <div id="voteArea" class="vote-area">게임이 시작되면 투표할 수 있어요.</div>
           </div>
         </div>
 
