@@ -103,6 +103,7 @@ function getPublicRoom(room) {
       isHost: p.id === room.hostId,
       connected: p.connected,
       hasYangSubmission: Boolean(p.yangSubmission),
+      yangSolved: Boolean(p.yangSolved),
     })),
     votes: room.votes,
     result: room.result,
@@ -141,6 +142,9 @@ function getMyInfo(room, socketId) {
       word: null,
       yangSubmission: player.yangSubmission || "",
       yangWord: gameIsVisible ? player.yangWord : null,
+      yangGuess: player.yangGuess || "",
+      yangSolved: Boolean(player.yangSolved),
+      yangGuessResult: player.yangGuessResult || null,
     };
   }
 
@@ -207,6 +211,9 @@ io.on("connection", (socket) => {
           connected: true,
           yangSubmission: "",
           yangWord: null,
+          yangGuess: "",
+          yangSolved: false,
+          yangGuessResult: null,
         },
       ],
       votes: {},
@@ -239,6 +246,9 @@ io.on("connection", (socket) => {
       connected: true,
       yangSubmission: "",
       yangWord: null,
+      yangGuess: "",
+      yangSolved: false,
+      yangGuessResult: null,
     });
     socket.join(roomCode);
     socket.data.roomCode = roomCode;
@@ -301,6 +311,11 @@ io.on("connection", (socket) => {
       }
       const assigned = assignYangWords(room.players);
       if (!assigned) return callback?.({ ok: false, message: "제시어 배정에 실패했어요. 단어를 바꿔 다시 시도해 주세요." });
+      room.players.forEach((p) => {
+        p.yangGuess = "";
+        p.yangSolved = false;
+        p.yangGuessResult = null;
+      });
       room.status = "playing";
       room.votes = {};
       room.result = null;
@@ -376,6 +391,36 @@ io.on("connection", (socket) => {
     emitPrivateInfo(roomCode);
   });
 
+
+  socket.on("yang:guess", ({ guess }, callback) => {
+    const roomCode = socket.data.roomCode;
+    const room = rooms.get(roomCode);
+    if (!room || room.gameType !== "yang" || room.status !== "playing") {
+      return callback?.({ ok: false, message: "지금은 정답을 입력할 수 없습니다." });
+    }
+
+    const player = room.players.find((p) => p.id === socket.id);
+    if (!player) return callback?.({ ok: false, message: "플레이어를 찾을 수 없습니다." });
+
+    const cleanGuess = String(guess || "").trim().slice(0, 20);
+    if (!cleanGuess) return callback?.({ ok: false, message: "추측한 제시어를 입력해 주세요." });
+
+    const normalize = (value) => String(value || "").trim().replace(/\s+/g, "").toLowerCase();
+    const correct = normalize(cleanGuess) === normalize(player.yangWord);
+
+    player.yangGuess = cleanGuess;
+    player.yangSolved = correct;
+    player.yangGuessResult = correct ? "correct" : "wrong";
+
+    callback?.({
+      ok: true,
+      correct,
+      message: correct ? "정답입니다!" : "아직 아니에요. 다시 질문해 보세요.",
+    });
+    emitRoom(roomCode);
+    emitPrivateInfo(roomCode);
+  });
+
   socket.on("yang:finish", () => {
     const roomCode = socket.data.roomCode;
     const room = rooms.get(roomCode);
@@ -397,6 +442,9 @@ io.on("connection", (socket) => {
     room.players.forEach((p) => {
       p.role = null;
       p.yangWord = null;
+      p.yangGuess = "";
+      p.yangSolved = false;
+      p.yangGuessResult = null;
       // 제출한 제시어는 다시 하기를 편하게 하려고 유지합니다.
     });
     emitRoom(roomCode);

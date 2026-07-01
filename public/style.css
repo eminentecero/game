@@ -493,3 +493,34 @@ button.secondary {
   .room-actions, .room-actions button, .button-row button { width: 100%; }
   .inline-form button { width: 100%; }
 }
+
+.entry-topline {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 14px;
+}
+
+button.tiny {
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.yang-guess {
+  background: #fff8dc;
+  border-color: rgba(255, 198, 41, 0.55);
+}
+
+.yang-guess h3 {
+  color: #3b2a00;
+}
+
+.yang-guess .hint-text {
+  color: #6d5a20;
+}
+
+.badge.ready {
+  background: #12b981;
+  color: #ffffff;
+}

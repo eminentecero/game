@@ -55,7 +55,10 @@
         </div>
       </section>
 
-      <section id="entry" class="panel entry-panel">
+      <section id="entry" class="panel entry-panel hidden">
+        <div class="entry-topline">
+          <button id="backToArcade" class="secondary tiny" type="button">← 게임 선택</button>
+        </div>
         <div class="section-title">
           <p class="eyebrow">INSERT COIN</p>
           <h2 id="selectedGameTitle">라이어 게임 입장</h2>
@@ -149,6 +152,21 @@
           <p class="eyebrow">PLAYER CARD</p>
           <h3 id="myStatus">대기 중입니다.</h3>
           <p id="myDetail">방장이 게임을 시작하면 카드가 표시됩니다.</p>
+        </div>
+
+
+
+        <div id="yangGuessBox" class="sub-panel yang-guess hidden">
+          <div class="section-title compact">
+            <p class="eyebrow">MY GUESS</p>
+            <h3>내 제시어 맞히기</h3>
+          </div>
+          <p class="hint-text">질문을 통해 알아낸 내 제시어를 입력해 보세요. 띄어쓰기는 달라도 정답 처리됩니다.</p>
+          <div class="inline-form">
+            <input id="yangGuessInput" maxlength="20" placeholder="내 제시어는 무엇일까?" autocomplete="off" />
+            <button id="submitYangGuess" type="button">정답 제출</button>
+          </div>
+          <p id="yangGuessMessage" class="message"></p>
         </div>
 
         <div id="yangBoard" class="sub-panel hidden">

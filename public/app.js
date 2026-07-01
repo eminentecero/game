@@ -14,6 +14,7 @@ const roomCodeInput = $("roomCode");
 const entryMessage = $("entryMessage");
 const roomMessage = $("roomMessage");
 const yangMessage = $("yangMessage");
+const yangGuessMessage = $("yangGuessMessage");
 
 const GAME_META = {
   liar: {
@@ -57,16 +58,25 @@ function selectGame(gameType) {
   });
 }
 
+function showArcadeHome() {
+  home.classList.remove("hidden");
+  entry.classList.add("hidden");
+  roomSection.classList.add("hidden");
+}
+
+function showEntryOnly(gameType = selectedGameType) {
+  selectGame(gameType);
+  home.classList.add("hidden");
+  entry.classList.remove("hidden");
+  roomSection.classList.add("hidden");
+  setMessage(entryMessage, "");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function showRoom() {
   home.classList.add("hidden");
   entry.classList.add("hidden");
   roomSection.classList.remove("hidden");
-}
-
-function showEntryOnly() {
-  home.classList.remove("hidden");
-  entry.classList.remove("hidden");
-  roomSection.classList.add("hidden");
 }
 
 function updateRoom(room) {
@@ -85,6 +95,7 @@ function updateRoom(room) {
   $("liarSettings").classList.toggle("hidden", !isLiarGame);
   $("yangSettings").classList.toggle("hidden", isLiarGame);
   $("yangSubmission").classList.toggle("hidden", isLiarGame || room.status !== "waiting");
+  $("yangGuessBox").classList.toggle("hidden", isLiarGame || room.status !== "playing");
   $("votePanel").classList.toggle("hidden", !isLiarGame);
   $("yangBoard").classList.toggle("hidden", isLiarGame || room.status === "waiting");
   $("finishYangGame").classList.toggle("hidden", isLiarGame || room.status !== "playing");
@@ -117,6 +128,19 @@ function updateMe(info) {
   if ($("yangWordInput") && currentRoom?.gameType === "yang" && currentRoom.status === "waiting") {
     $("yangWordInput").value = me.yangSubmission || "";
   }
+
+  if ($("yangGuessInput") && currentRoom?.gameType === "yang" && currentRoom.status === "playing") {
+    $("yangGuessInput").disabled = Boolean(me.yangSolved);
+    $("submitYangGuess").disabled = Boolean(me.yangSolved);
+    if (me.yangSolved) {
+      $("yangGuessInput").value = me.yangGuess || "";
+      setMessage(yangGuessMessage, "정답입니다! 이제 다른 사람이 맞히는 걸 지켜보세요.");
+    } else if (me.yangGuessResult === "wrong") {
+      setMessage(yangGuessMessage, `마지막 추측 “${me.yangGuess}”은(는) 아니에요.`);
+    } else {
+      setMessage(yangGuessMessage, "");
+    }
+  }
 }
 
 function renderMyCard() {
@@ -141,8 +165,10 @@ function renderMyCard() {
 
   if (currentRoom.gameType === "yang") {
     card.classList.add("yang-card");
-    title.textContent = "내 제시어는 비공개!";
-    detail.textContent = "다른 사람들에게 질문하면서 내 머리 위 제시어를 맞혀 보세요.";
+    title.textContent = me.yangSolved ? `정답 확인: ${me.yangGuess}` : "내 제시어는 비공개!";
+    detail.textContent = me.yangSolved
+      ? "정답을 맞혔어요. 다른 플레이어가 계속 추리할 수 있도록 힌트를 조절해 주세요."
+      : "다른 사람들에게 질문하면서 내 머리 위 제시어를 맞혀 보세요.";
     return;
   }
 
@@ -164,11 +190,12 @@ function renderPlayers(players) {
   list.innerHTML = "";
   players.forEach((player) => {
     const li = document.createElement("li");
-    const readyBadge = currentRoom?.gameType === "yang" && currentRoom.status === "waiting"
-      ? player.hasYangSubmission
-        ? '<span class="badge ready">제출</span>'
-        : '<span class="badge">미제출</span>'
-      : "";
+    let readyBadge = "";
+    if (currentRoom?.gameType === "yang" && currentRoom.status === "waiting") {
+      readyBadge = player.hasYangSubmission ? '<span class="badge ready">제출</span>' : '<span class="badge">미제출</span>';
+    } else if (currentRoom?.gameType === "yang" && currentRoom.status === "playing") {
+      readyBadge = player.yangSolved ? '<span class="badge ready">정답</span>' : '<span class="badge">추리 중</span>';
+    }
     li.innerHTML = `<span class="player-name">${escapeHtml(player.nickname)}</span><span>${
       player.isHost ? '<span class="badge">방장</span>' : ""
     }${player.id === socket.id ? '<span class="badge me">나</span>' : ""}${readyBadge}</span>`;
@@ -214,8 +241,10 @@ function renderYangBoard() {
     const isMine = item.id === socket.id;
     const card = document.createElement("div");
     card.className = `yang-board-card${isMine ? " mine" : ""}`;
+    const playerState = currentRoom.players.find((p) => p.id === item.id);
+    const solvedBadge = playerState?.yangSolved ? ' <span class="badge ready">정답</span>' : "";
     card.innerHTML = `
-      <span class="player-name">${escapeHtml(item.nickname)}${isMine ? ' <span class="badge me">나</span>' : ""}</span>
+      <span class="player-name">${escapeHtml(item.nickname)}${isMine ? ' <span class="badge me">나</span>' : ""}${solvedBadge}</span>
       <span class="word">${isMine ? "???" : escapeHtml(item.word)}</span>
     `;
     list.appendChild(card);
@@ -323,15 +352,29 @@ function submitYangWord() {
   });
 }
 
+function submitYangGuess() {
+  setMessage(yangGuessMessage, "");
+  socket.emit("yang:guess", { guess: $("yangGuessInput").value }, (res) => {
+    if (!res.ok) return setMessage(yangGuessMessage, res.message);
+    setMessage(yangGuessMessage, res.message);
+    if (res.correct) {
+      $("yangGuessInput").disabled = true;
+      $("submitYangGuess").disabled = true;
+    }
+  });
+}
+
+
 document.querySelectorAll("[data-select-game]").forEach((button) => {
-  button.addEventListener("click", () => {
-    selectGame(button.dataset.selectGame);
-    entry.scrollIntoView({ behavior: "smooth", block: "start" });
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    showEntryOnly(button.dataset.selectGame);
   });
 });
 document.querySelectorAll("[data-game-card]").forEach((card) => {
-  card.addEventListener("click", () => selectGame(card.dataset.gameCard));
+  card.addEventListener("click", () => showEntryOnly(card.dataset.gameCard));
 });
+$("backToArcade").addEventListener("click", showArcadeHome);
 
 $("createRoom").addEventListener("click", createRoom);
 $("joinRoom").addEventListener("click", joinRoom);
@@ -341,6 +384,10 @@ $("finishYangGame").addEventListener("click", () => socket.emit("yang:finish"));
 $("submitYangWord").addEventListener("click", submitYangWord);
 $("yangWordInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitYangWord();
+});
+$("submitYangGuess").addEventListener("click", submitYangGuess);
+$("yangGuessInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitYangGuess();
 });
 $("category").addEventListener("change", (e) => socket.emit("game:setCategory", { category: e.target.value }));
 $("foolMode").addEventListener("change", (e) => socket.emit("game:setFoolMode", { enabled: e.target.checked }));
@@ -353,16 +400,19 @@ $("backHome").addEventListener("click", () => {
   history.pushState(null, "", "/");
   currentRoom = null;
   me = null;
-  showEntryOnly();
+  showArcadeHome();
 });
 
 socket.on("room:update", updateRoom);
 socket.on("me:update", updateMe);
 
 selectGame("liar");
+showArcadeHome();
 const initialCode = getCodeFromPath();
 if (initialCode) {
   roomCodeInput.value = initialCode;
+  home.classList.add("hidden");
+  entry.classList.remove("hidden");
+  roomSection.classList.add("hidden");
   setMessage(entryMessage, "닉네임을 입력한 뒤 입장해 주세요.");
-  entry.scrollIntoView({ behavior: "smooth", block: "start" });
 }
